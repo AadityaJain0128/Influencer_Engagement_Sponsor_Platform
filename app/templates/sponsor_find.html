@@ -1,0 +1,117 @@
+{% extends 'sponsor_base.html' %}
+{% block title %}Find Influencer{% endblock title %}
+{% block body %}
+    <div id="container">
+        <h1 align="center">Find Influencers</h1>
+        <br><br>
+        <div style="width: 20%; float: left;" class="m-3">
+            <h3>Filters</h3>
+            <br>
+            <form method="GET">
+                <label for="name" class="form-label">Username / Name</label>
+                <input type="text" id="name" name="name" placeholder="Search by Name" value="{{ name }}" class="form-control">
+                <br>
+                <label for="niche" class="form-label">Niche</label>
+                <select id="niche" name="niche" class="form-control">
+                    <option value="">Select Niche</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.name }}" {% if cat.name == niche %} selected {% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+                <br>
+                <button type="submit" class="btn btn-outline-dark">Search</button>
+            </form>
+        </div>
+        <div style="width: 65%; float: right;" class="me-5">
+            {% if influencers %}
+                <div class="row">
+                    {% for i in influencers %}
+                        <div class="col-md-4 mb-5">
+                            <div class="card" style="width: 18rem; align-items: center; text-align: center;">
+                                <img src="{{ url_for('static', filename=i.profile_picture) }}" width="200px" height="200px" class="mt-2" style="border-radius: 50%; object-fit: cover;" class="card-title">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ i.name }}</h5>
+                                    <p class="card-text">@{{ i.username }}</p>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Niche: {{ i.niche }}</li>
+                                    {% if avg_ratings[i] %}
+                                        <li class="list-group-item">Rating: {{ avg_ratings[i][0] }} <span class="text-muted" style="font-size: smaller;">({{ avg_ratings[i][1] }})</span></li>
+                                    {% else %}
+                                        <li class="list-group-item">Rating: -- <span class="text-muted" style="font-size: smaller;">(0)</span></li>
+                                    {% endif %}
+                                    <li class="list-group-item">Reach: {{ i.reach }}</li>
+                                    <li class="list-group-item">
+                                        Active Socials<br>
+                                        {% if i.reach == 0 %}
+                                            <span class="text-muted">No Socials added !</span>
+                                        {% else %}
+                                            {% for social in i.socials %}
+                                                {% if i.socials[social] %}
+                                                    <img src="{{ url_for('static', filename='images/' + social + '.png') }}" width="30px" class="m-1 mt-2">
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </li>
+                                </ul>
+                                <div class="card-body">
+                                    <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#{{ i.id }}">Send Request</button>
+                                    <div class="modal fade" id="{{ i.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <form method="POST">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Request @{{ i.username }}</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <table class="table table-striped mt-5">
+                                                            <tr>
+                                                                <th>Messages</th>
+                                                                <td><input type="text" name="messages" class="form-control" required></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Requirements</th>
+                                                                <td><input type="text" name="requirements" class="form-control" required></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Select Campaign</th>
+                                                                <td>
+                                                                    <select name="campaign_id" class="form-control" required>
+                                                                        <option value="" selected disabled>Select Campaign</option>
+                                                                            {% for campaign in campaigns %}
+                                                                                <option value="{{ campaign.id }}">{{ campaign.name }}</option>
+                                                                            {% endfor %}
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                        <input type="number" name="influencer_id" value="{{ i.id }}" hidden>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        {% if campaigns %}
+                                                            <button type="submit" class="btn btn-primary">Send Request</button>
+                                                        {% else %}
+                                                            <a type="button" href="{{ url_for('sponsor.campaigns') }}" class="btn btn-primary">Add a Campaign First !</a>
+                                                        {% endif %}
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="margin: 130px 0 0 220px;">
+                    <span>No Results found !</span>
+                    <br><br>
+                    <a href="{{ url_for('sponsor.find') }}" class="btn btn-outline-secondary">Clear all filters</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

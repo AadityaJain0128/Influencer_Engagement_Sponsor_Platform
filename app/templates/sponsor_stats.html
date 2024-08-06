@@ -1,0 +1,97 @@
+{% extends 'sponsor_base.html' %}
+{% block title %}Statistics{% endblock title %}
+{% block body %}
+    <div id="container">
+        <h1 align="center" class="mb-5">Statistics</h1>
+        <div style="width: 50%; float: left;">
+            <canvas id="campaigns" style="width:100%; max-width:700px"></canvas>
+            <br>
+            <div align="center"><span>Total Campaigns<br>{{ campaign_values | sum }}</span></div>
+        </div>
+        <div style="width: 50%; float: left;">
+            <canvas id="transactions" style="width:100%; max-width:700px"></canvas>
+            <br>
+            <div align="center">
+                <span>
+                    Average Completed Campaign Budget
+                    <br>
+                    {% if transaction_values | length != 0 %}
+                        INR {{ ((transaction_values | sum) / (transaction_values | length)) | round(2) }}
+                    {% else %}
+                        INR 0
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script>
+        var campaign_labels = {{ campaign_labels | tojson}};
+        var campaign_values = {{ campaign_values | tojson }};
+        var campaign_colors = ["green", "orange", "blue"];
+        new Chart("campaigns", {
+            type: "pie",
+            data: {
+                labels: campaign_labels,
+                datasets: [{
+                    data: campaign_values,
+                    backgroundColor: campaign_colors
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: "Campaigns"
+                }
+            }
+        });
+
+        var transaction_labels = {{ transaction_labels | tojson }};
+        var transaction_values = {{ transaction_values | tojson }};
+        new Chart("transactions", {
+            type: "bar",
+            data: {
+                labels: transaction_labels,
+                datasets: [{
+                    data: transaction_values,
+                    backgroundColor: transaction_values.map(() => randomizeColor())
+                }]
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: "Transactions"
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Budget"
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Completed Campaigns"
+                        }
+                    }]
+                }
+            }
+        });
+
+        function randomizeColor() {
+            const hex = "0123456789ABCDEF";
+            let color_code = "#";
+            for (i = 0; i < 6; i++) {
+                color_code += hex[parseInt(Math.random() * 16)]
+            }
+            return color_code
+        }
+    </script>
+{% endblock body %}

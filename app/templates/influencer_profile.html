@@ -1,0 +1,96 @@
+{% extends 'influencer_base.html' %}
+{% block title %}Profile{% endblock title %}
+{% block body %}
+    <div class="container">
+        <div class="m-5">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th colspan="2" class="text-center"><h1>Profile Page</h1></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">Profile Picture</th>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <form method="POST" action="{{ url_for('influencer.picture_update') }}" enctype="multipart/form-data" class="mt-2">
+                                    <div style="float: left; width: 40%;">
+                                        <img src="{{ url_for('static', filename=current_user.influencer.profile_picture) }}" width="100" height="100" style="object-fit: cover; border-radius: 50%;">
+                                        <input type="file" accept="image/*" name="profile_pic" required class="form-control-file">
+                                    </div>
+                                    <div style="float: right; width: 60%;">
+                                        {% if current_user.influencer.profile_picture == "profile_pictures/default_profile_picture.png" %}
+                                            <button type="submit" class="btn btn-outline-dark btn-sm" style="margin-top: 5vh;">Add Picture</button>
+                                        {% else %}
+                                            <button type="submit" class="btn btn-outline-dark btn-sm" style="margin-top: 3vh;">Update Picture</button><br>
+                                        {% endif %}                                            
+                                        {% if current_user.influencer.profile_picture != "profile_pictures/default_profile_picture.png" %}
+                                            <a class="btn btn-outline-dark btn-sm mt-2" href="{{ url_for('influencer.picture_remove') }}">Remove Picture</a>
+                                        {% endif %}
+                                    </div>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <form method="POST">
+                        <tr>
+                            <th scope="row">User Name</th>
+                            <td>{{ current_user.username }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="email">E-Mail ID</label></th>
+                            <td>{{ current_user.email }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="name">Name</label></th>
+                            <td><input type="text" id="name" name="name" value="{{ current_user.influencer.name }}" class="form-control" required></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="niche">Niche</label></th>
+                            <td>
+                                <select id="niche" name="niche" class="form-control">
+                                    {% for category in categories %}
+                                        <option value="{{ category.name }}" {% if category.name == current_user.influencer.niche %} selected {% endif %}>{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Socials<br>(Enter No. of Followers<br>on each platform<br>if active else 0)</th>
+                            <td>
+                                {% for social in ["facebook", "instagram", "linkedin", "twitter", "youtube"] %}
+                                    <label for="{{ social }}" class="form-label"><img src="{{ url_for('static', filename='images/' + social + '.png') }}" width="30px"></label>
+                                    <input type="number" id="{{ social }}" name="{{ social }}" value="{{ current_user.influencer.socials[social] or 0 }}">
+                                    <br>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Reach<br>(Calculated based on the<br>No. of followers)</th>
+                            <td>{{ current_user.influencer.reach }}</td>
+                        </tr>
+                        <tr>
+                            <th>Rating</th>
+                            {% if avg_rating %}
+                                <td>{{ avg_rating[0] }} <span class="text-muted" style="font-size: smaller;">({{ avg_rating[1] }})</span></td>
+                            {% else %}
+                                <td><b>--</b> <span class="text-muted" style="font-size: smaller;">(0)</span></td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <th>Total<br>Earnings</th>
+                            <td>INR {{ earnings }}</td>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <td colspan="2">
+                                <button type="submit" class="btn btn-outline-dark">Save Changes</button>
+                            </td>
+                        </tr>
+                    </form>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock body %}

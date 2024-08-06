@@ -1,0 +1,111 @@
+{% extends 'sponsor_base.html' %}
+{% block title %}Dashboard{% endblock title %}
+{% block body %}
+    <div id="container">
+        <h1 align="center">Welcome {{ current_user.sponsor.name }}</h1>
+        <br><br>
+        <div id="active_campaigns" class="m-4 mt-5">
+            <h4>Active Campaigns:</h4>
+            {% if active_campaigns %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Start Date</th>
+                            <th scope="col">End Date</th>
+                            <th scope="col">Budget</th>
+                            <th scope="col">Visibility</th>
+                            <th scope="col">Progress</th>
+                            <th scope="col">Influencer</th>
+                            <th scope="col">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        {% for campaign in active_campaigns[::-1] %}
+                            <tr>
+                                <td>{{ campaign.name }}</td>
+                                <td>{{ campaign.start_date.strftime("%d %b, %Y") }}</td>
+                                <td>{{ campaign.end_date.strftime("%d %b, %Y") }}</td>
+                                <td>INR {{ campaign.budget }}</td>
+                                <td>{{ campaign.visibility }}</td>
+                                <td>
+                                    {% if campaign.end_date == campaign.start_date %}
+                                        {% if datetime.now().date() == campaign.end_date %}
+                                            100%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    {% else %}
+                                        {% if (datetime.now().date() - campaign.start_date) / (campaign.end_date - campaign.start_date) * 100 > 100 %}
+                                            100%
+                                        {% elif (datetime.now().date() - campaign.start_date) / (campaign.end_date - campaign.start_date) * 100 > 0 %}
+                                            {{ ((datetime.now().date() - campaign.start_date) / (campaign.end_date - campaign.start_date) * 100) | int }}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td>{{ Influencer.query.filter_by(id=campaign.influencer_id).first().name }}</td>
+                                <td><a href="{{ url_for('sponsor.campaign_view', id=campaign.id) }}" type="button" class="btn btn-outline-dark">View</a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <span class="text-muted">Nothing Here !</span>
+            {% endif %}
+        </div>
+        <div id="recieved_requests" class="m-4 mt-5">
+            <h4>Recieved Requests:</h4>
+            {% if recieved_requests %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Influencer Name</th>
+                            <th scope="col">Influencer Username</th>
+                            <th scope="col">Messages</th>
+                            <th scope="col">Requirements</th>
+                            <th scope="col">Budget</th>
+                            <th scope="col">Pay Amount</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Details</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        {% for request in recieved_requests[::-1] %}
+                            <tr>
+                                <td>{{ Influencer.query.filter_by(id=request.influencer_id).first().name }}</td>
+                                <td>{{ Influencer.query.filter_by(id=request.influencer_id).first().username }}</td>
+                                <td>{{ request.messages }}</td>
+                                <td>{{ request.requirements }}</td>
+                                <td>INR {{ Campaign.query.filter_by(id=request.campaign_id).first().budget }}</td>
+                                {% if request.budget == Campaign.query.filter_by(id=request.campaign_id).first().budget %}
+                                    <td>INR {{ request.budget }}</td>
+                                {% elif request.budget > Campaign.query.filter_by(id=request.campaign_id).first().budget %}
+                                    <td style="color: red;">INR {{ request.budget }}</td>
+                                {% else %}
+                                    <td style="color: green;">INR {{ request.budget }}</td>
+                                {% endif %}
+                                {% if request.status == "pending" %}
+                                    <td style="color: orange;">{{ request.status | capitalize }}</td>
+                                {% elif request.status == "rejected" %}
+                                    <td style="color: red;">{{ request.status | capitalize }}</td>
+                                {% else %}
+                                    <td style="color: green;">{{ request.status | capitalize }}</td>
+                                {% endif %}
+                                <td><a href="{{ url_for('sponsor.campaign_view', id=request.campaign.id) }}" class="btn btn-outline-dark">View</a></td>
+                                <td>
+                                    <a class="btn btn-outline-success" href="{{ url_for('sponsor.accept_request', rid=request.id) }}">Accept</a>
+                                    <a class="btn btn-outline-danger" href="{{ url_for('sponsor.reject_request', rid=request.id) }}">Reject</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <span class="text-muted">Nothing Here !</span>
+            {% endif %}
+        </div>
+    </div>
+{% endblock body %}

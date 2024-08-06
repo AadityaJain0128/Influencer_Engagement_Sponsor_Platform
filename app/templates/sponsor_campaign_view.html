@@ -1,0 +1,208 @@
+{% extends 'sponsor_base.html' %}
+{% block title %}Campaign Details{% endblock title %}
+{% block body %}
+    <div id="container">
+        <h1 align="center">Campaign Details</h1>
+        {% if campaign.flagged %}
+            <div id="message" class="mt-5" style="text-align: center; align-content: center;">
+                <img src="{{ url_for('static', filename='images/warning.png') }}" width="70px">
+                <h3>Campaign has been <span class="text-danger">Flagged</span> by Admin !</h3>
+                <h6 class="text-muted">Please contact Administrator for more Information.</h6>
+            </div>
+        {% endif %}
+        <div id="campaign_details" style="width: 30%; float: left;">
+            <form method="POST" action="{{ url_for('sponsor.campaign_edit', id=campaign.id) }}">
+                <table class="table table-striped mt-5">
+                    <tr>
+                        <th>Name</th>
+                        <td><input type="text" name="name" value="{{ campaign.name }}" class="form-control"></td>
+                    </tr>
+                    <tr>
+                        <th>Description</th>
+                        <td><textarea name="description" class="form-control" rows="5">{{ campaign.description }}</textarea></td>
+                    </tr>
+                    <tr>
+                        <th>Start Date</th>
+                        <td><input type="date" name="start_date" value="{{ campaign.start_date }}" class="form-control"></td>
+                    </tr>
+                    <tr>
+                        <th>End Date</th>
+                        <td><input type="date" name="end_date" value="{{ campaign.end_date }}" class="form-control"></td>
+                    </tr>
+                    <tr>
+                        <th>Budget (INR)</th>
+                        <td><input type="number" step="0.01" name="budget" value="{{ campaign.budget }}" class="form-control"></td>
+                    </tr>
+                    <tr>
+                        <th>Visibility</th>
+                        <td>
+                            <select name="visibility" class="form-control">
+                                <option value="public" {% if campaign.visibility == "public" %} selected {% endif %}>Public</option>
+                                <option value="private" {% if campaign.visibility == "private" %} selected {% endif %}>Private</option>
+                            </select>
+                        </td>
+                    </tr>
+                        {% if campaign.influencer_id %}
+                            <tr>
+                                <th>Influencer</th>
+                                <td>{{ Influencer.query.filter_by(id=campaign.influencer_id).first().name }} (@{{ Influencer.query.filter_by(id=campaign.influencer_id).first().username }})</td>
+                            </tr>
+                            {% if Rating.query.filter_by(campaign_id=campaign.id).first() %}
+                                <tr>
+                                    <th>Rating</th>
+                                    <td>{{ Rating.query.filter_by(campaign_id=campaign.id).first().rating }}</td>
+                                </tr>
+                            {% elif campaign.completed %}
+                                <tr>
+                                    <th>Paid Amount</th>
+                                    <td>INR {{ campaign.budget }}</td>
+                                </tr>
+                                <tr>
+                                    <td><button type="button" data-bs-toggle="modal" data-bs-target="#rating" class="btn btn-outline-dark">Rate Influencer</button></td>
+                                    <td></td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td><a href="{{ url_for('sponsor.campaign_complete', id=campaign.id) }}" class="btn btn-outline-dark">Mark as Completed</a></td>
+                                    <td></td>
+                                </tr>
+                            {% endif %}
+                        {% else %}
+                            <tr>
+                                <td><button type="submit" class="btn btn-outline-dark">Save changes</button></td>
+                                <td></td>
+                            </tr>
+                        {% endif %}
+                    </table>
+                </form>
+            </div>
+            {% if campaign.completed %}
+                <div class="modal fade" id="rating" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form method="GET" action="{{ url_for('sponsor.rating', id=campaign.id) }}">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Rate Influencer</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table table-striped mt-3">
+                                        <tr>
+                                            <th>Campaign Name</th>
+                                            <td>{{ campaign.name }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Influencer Username</th>
+                                            <td>{{ Influencer.query.filter_by(id=campaign.influencer_id).first().username }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Rating<br>(Between 1 to 5)</th>
+                                            <td><input type="number" name="r" min="1" max="5" step=".5" class="form-control" required></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Discard</button>
+                                    <button type="submit" class="btn btn-primary">Rate</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div id="requests" style="width: 69%; float: right;">
+            <div id="recieved_requests" class="m-4 mt-5">
+                <h4>Recieved Requests:</h4>
+                {% if recieved_requests %}
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Influencer Name</th>
+                                <th scope="col">Username</th>
+                                <th scope="col">Messages</th>
+                                <th scope="col">Requirements</th>
+                                <th scope="col">Pay Amount</th>
+                                <th scope="col">Status</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+                            {% for request in recieved_requests[::-1] %}
+                                <tr>
+                                    <td>{{ Influencer.query.filter_by(id=request.influencer_id).first().name }}</td>
+                                    <td>{{ Influencer.query.filter_by(id=request.influencer_id).first().username }}</td>
+                                    <td>{{ request.messages }}</td>
+                                    <td>{{ request.requirements }}</td>
+                                    {% if request.budget == campaign.budget %}
+                                        <td>INR {{ request.budget }}</td>
+                                    {% elif request.budget > campaign.budget %}
+                                        <td style="color: red;">INR {{ request.budget }}</td>
+                                    {% else %}
+                                        <td style="color: green;">INR {{ request.budget }}</td>
+                                    {% endif %}
+                                    {% if request.status == "pending" %}
+                                        <td style="color: orange;">{{ request.status | capitalize }}</td>
+                                    {% elif request.status == "rejected" %}
+                                        <td style="color: red;">{{ request.status | capitalize }}</td>
+                                    {% else %}
+                                        <td style="color: green;">{{ request.status | capitalize }}</td>
+                                    {% endif %}
+                                    {% if request.status == "pending" %}
+                                        <td>
+                                            <a class="btn btn-outline-success" href="{{ url_for('sponsor.accept_request', rid=request.id) }}">Accept</a>
+                                            <a class="btn btn-outline-danger" href="{{ url_for('sponsor.reject_request', rid=request.id) }}">Reject</a>
+                                        </td>
+                                    {% elif request.status == "rejected" %}
+                                        <td></td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <span class="text-muted">Nothing Here !</span>
+                {% endif %}
+            </div>
+            <div id="sent_requests" class="m-4 mt-5">
+                <h4>Sent Requests:</h4>
+                {% if sent_requests %}
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Influencer Name</th>
+                                <th scope="col">Username</th>
+                                <th scope="col">Messages</th>
+                                <th scope="col">Requirements</th>
+                                <th scope="col">Pay Amount</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+                            {% for request in sent_requests[::-1] %}
+                                <tr>
+                                    <td>{{ Influencer.query.filter_by(id=request.influencer_id).first().name }}</td>
+                                    <td>{{ Influencer.query.filter_by(id=request.influencer_id).first().username }}</td>
+                                    <td>{{ request.messages }}</td>
+                                    <td>{{ request.requirements }}</td>
+                                    <td>INR {{ request.budget }}</td>
+                                    {% if request.status == "pending" %}
+                                        <td style="color: orange;">{{ request.status | capitalize }}</td>
+                                    {% elif request.status == "rejected" %}
+                                        <td style="color: red;">{{ request.status | capitalize }}</td>
+                                    {% else %}
+                                        <td style="color: green;">{{ request.status | capitalize }}</td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <span class="text-muted">Nothing Here !</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock body %}

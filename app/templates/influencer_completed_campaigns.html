@@ -1,0 +1,94 @@
+{% extends 'influencer_base.html' %}
+{% block title %}Completed Campaigns{% endblock title %}
+{% block body %}
+    <div id="container">
+        <div id="completed_campaigns" class="m-5">
+            <h1 align="center" class="mb-4">Completed Campaigns</h1>
+            <div id="active_campaigns">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Campaign</th>
+                            <th scope="col">Sponsor</th>
+                            <th scope="col">Start Date</th>
+                            <th scope="col">End Date</th>
+                            <th scope="col">Pay Amount</th>
+                            <th scope="col">Transaction ID</th>
+                            <th scope="col">Paid on</th>
+                            <th scope="col">Rating</th>
+                            <th scope="col">Campaign Details</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        {% if completed_campaigns %}
+                            {% for campaign in completed_campaigns[::-1] %}
+                                <tr>
+                                    <td>{{ campaign.name }}</td>
+                                    <td>{{ campaign.sponsor.name }}</td>
+                                    <td>{{ campaign.start_date.strftime("%d %b, %Y") }}</td>
+                                    <td>{{ campaign.end_date.strftime("%d %b, %Y") }}</td>
+                                    <td>INR {{ Transaction.query.filter_by(campaign_id=campaign.id).first().amount }}</td>
+                                    <td>{{ Transaction.query.filter_by(campaign_id=campaign.id).first().id }}</td>
+                                    <td>{{ Transaction.query.filter_by(campaign_id=campaign.id).first().date.strftime("%d-%b-%Y %H:%M:%S") }}</td>
+                                    {% if Rating.query.filter_by(campaign_id=campaign.id, influencer_id=current_user.influencer.id).first() %}
+                                        <td>{{ Rating.query.filter_by(campaign_id=campaign.id, influencer_id=current_user.influencer.id).first().rating }}</td>
+                                    {% else %}
+                                        <td>--</td>
+                                    {% endif %}
+                                    <td>
+                                        <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#{{ campaign.id }}">View</button>
+                                        <div class="modal fade" id="{{ campaign.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-fullscreen">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Campaign Details</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body d-flex justify-content-center">
+                                                        <table class="table table-striped mt-5" style="width: 60%;">
+                                                            <tr>
+                                                                <th>Name</th>
+                                                                <td>{{ campaign.name }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Description</th>
+                                                                <td>{{ campaign.description }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Start Date</th>
+                                                                <td>{{ campaign.start_date.strftime("%d %b, %Y") }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>End Date</th>
+                                                                <td>{{ campaign.end_date.strftime("%d %b, %Y") }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Budget</th>
+                                                                <td>{{ campaign.budget }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Visibility</th>
+                                                                <td>{{ campaign.visibility }}</td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td align="center" rowspan="2" colspan="9">No completed Campaigns !</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock body %}

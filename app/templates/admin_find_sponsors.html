@@ -1,0 +1,59 @@
+{% extends 'admin_base.html' %}
+{% block title %}Find Sponsors{% endblock title %}
+{% block body %}
+    <div id="container">
+        <h1 align="center">Find Sponsors</h1>
+        <br><br>
+        <div style="width: 20%; float: left;" class="m-3">
+            <h3>Filters</h3>
+            <br>
+            <form method="GET">
+                <label for="name" class="form-label">Username / Name</label>
+                <input type="text" id="name" name="name" placeholder="Search by Name" value="{{ name }}" class="form-control">
+                <br>
+                <label for="industry" class="form-label">Industry</label>
+                <select id="industry" name="industry" class="form-control">
+                    <option value="">Select Industry</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.name }}" {% if cat.name == industry %} selected {% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+                <br>
+                <button type="submit" class="btn btn-outline-dark">Search</button>
+            </form>
+        </div>
+        <div style="width: 65%; float: right;" class="me-5">
+            {% if sponsors %}
+                <div class="row">
+                    {% for s in sponsors %}
+                        <div class="col-md-4 mb-5">
+                            <div class="card" style="width: 18rem; align-items: center; text-align: center;">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ s.name }}</h5>
+                                    <p class="card-text">@{{ s.username }}</p>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Industry: {{ s.industry }}</li>
+                                    <li class="list-group-item">Completed Campaigns: {{ s.campaigns.filter_by(completed=True).all() | length }}</li>
+                                    <li class="list-group-item">Active Campaigns: {{ s.campaigns.filter(Campaign.completed==False, Campaign.influencer_id.isnot(None)).all() | length }}</li>
+                                    <li class="list-group-item">Pending Campaigns: {{ s.campaigns.filter(Campaign.influencer_id.is_(None)).all() | length }}</li>
+                                </ul>
+                                <div class="card-body">
+                                    <form method="POST" action="{{ url_for('admin.flag_user', username=s.username) }}">
+                                        <button type="submit" class="btn btn-outline-danger">Flag Sponsor</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="margin: 130px 0 0 220px;">
+                    <span>No Results found !</span>
+                    <br><br>
+                    <a href="{{ url_for('admin.find_sponsor') }}" class="btn btn-outline-secondary">Clear all filters</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock body %}

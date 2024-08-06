@@ -1,0 +1,198 @@
+{% extends 'influencer_base.html' %}
+{% block title %}Requests{% endblock title %}
+{% block body %}
+    <div id="container">
+        <h1 align="center">Requests</h1>
+        <div id="recieved_requests" class="m-4 mt-5">
+            <h4>Recieved Requests:</h4>
+            {% if recieved_requests %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Campaign</th>
+                            <th scope="col">Sponsor</th>
+                            <th scope="col">Messages</th>
+                            <th scope="col">Requirements</th>
+                            <th scope="col">Pay Amount</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Details</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        {% for request in recieved_requests[::-1] %}
+                            <tr>
+                                <td>{{ request.campaign.name }}</td>
+                                <td>{{ request.campaign.sponsor.name }}</td>
+                                <td>{{ request.messages }}</td>
+                                <td>{{ request.requirements }}</td>
+                                <td>{{ request.budget }}</td>
+                                {% if request.status == "pending" %}
+                                    <td style="color: orange;">{{ request.status | capitalize }}</td>
+                                {% elif request.status == "rejected" %}
+                                    <td style="color: red;">{{ request.status | capitalize }}</td>
+                                {% else %}
+                                    <td style="color: green;">{{ request.status | capitalize }}</td>
+                                {% endif %}
+                                <td>
+                                    <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#{{ request.campaign.id }}">View</button>
+                                    <div class="modal fade" id="{{ request.campaign.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-fullscreen">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Campaign Details</h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                {% if request.campaign.flagged %}
+                                                    <div id="message" class="mt-5" style="text-align: center; align-content: center;">
+                                                        <img src="{{ url_for('static', filename='images/warning.png') }}" width="70px">
+                                                        <h3>Campaign has been <span class="text-danger">Flagged</span> by Admin !</h3>
+                                                    </div>
+                                                {% endif %}
+                                                <div class="modal-body d-flex justify-content-center">
+                                                    <table class="table table-striped mt-5" style="width: 60%;">
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <td>{{ request.campaign.name }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Description</th>
+                                                            <td>{{ request.campaign.description }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Start Date</th>
+                                                            <td>{{ request.campaign.start_date.strftime("%d %b, %Y") }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>End Date</th>
+                                                            <td>{{ request.campaign.end_date.strftime("%d %b, %Y") }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Budget</th>
+                                                            <td>{{ request.campaign.budget }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Visibility</th>
+                                                            <td>{{ request.campaign.visibility }}</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if request.status == "pending" %}
+                                        <a class="btn btn-outline-success" href="{{ url_for('influencer.accept_request', rid=request.id) }}">Accept</a>
+                                        <a class="btn btn-outline-danger" href="{{ url_for('influencer.reject_request', rid=request.id) }}">Reject</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <span class="text-muted">Nothing Here !</span>
+            {% endif %}
+        </div>
+        <div id="sent_requests" class="m-4 mt-5">
+            <h4>Sent Requests:</h4>
+            {% if sent_requests %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Campaign</th>
+                            <th scope="col">Sponsor</th>
+                            <th scope="col">Messages</th>
+                            <th scope="col">Requirements</th>
+                            <th scope="col">Budget</th>
+                            <th scope="col">Pay Amount</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        {% for request in sent_requests[::-1] %}
+                            <tr>
+                                <td>{{ request.campaign.name }}</td>
+                                <td>{{ request.campaign.sponsor.name }}</td>
+                                <td>{{ request.messages }}</td>
+                                <td>{{ request.requirements }}</td>
+                                <td>INR {{ request.campaign.budget }}</td>
+                                {% if request.budget == request.campaign.budget %}
+                                    <td>INR {{ request.budget }}</td>
+                                {% elif request.budget > request.campaign.budget %}
+                                    <td style="color: green;">INR {{ request.budget }}</td>
+                                {% else %}
+                                    <td style="color: red;">INR {{ request.budget }}</td>
+                                {% endif %}
+                                {% if request.status == "pending" %}
+                                    <td style="color: orange;">{{ request.status | capitalize }}</td>
+                                {% elif request.status == "rejected" %}
+                                    <td style="color: red;">{{ request.status | capitalize }}</td>
+                                {% else %}
+                                    <td style="color: green;">{{ request.status | capitalize }}</td>
+                                {% endif %}
+                                <td>
+                                    <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#{{ request.campaign.id }}">View</button>
+                                    <div class="modal fade" id="{{ request.campaign.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-fullscreen">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Campaign Details</h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                {% if request.campaign.flagged %}
+                                                    <div id="message" class="mt-5" style="text-align: center; align-content: center;">
+                                                        <img src="{{ url_for('static', filename='images/warning.png') }}" width="70px">
+                                                        <h3>Campaign has been <span class="text-danger">Flagged</span> by Admin !</h3>
+                                                    </div>
+                                                {% endif %}
+                                                <div class="modal-body d-flex justify-content-center">
+                                                    <table class="table table-striped mt-5" style="width: 60%;">
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <td>{{ request.campaign.name }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Description</th>
+                                                            <td>{{ request.campaign.description }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Start Date</th>
+                                                            <td>{{ request.campaign.start_date.strftime("%d %b, %Y") }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>End Date</th>
+                                                            <td>{{ request.campaign.end_date.strftime("%d %b, %Y") }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Budget</th>
+                                                            <td>{{ request.campaign.budget }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Visibility</th>
+                                                            <td>{{ request.campaign.visibility }}</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <span class="text-muted">Nothing Here !</span>
+            {% endif %}
+        </div>
+    </div>
+{% endblock body %}

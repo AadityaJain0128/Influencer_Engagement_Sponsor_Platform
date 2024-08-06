@@ -1,0 +1,46 @@
+{% extends 'sponsor_base.html' %}
+{% block title %}Transactions{% endblock title %}
+{% block body %}
+    <div id="container">
+        <div id="transactions" class="m-5">
+            <h1 align="center">Transactions</h1>
+            <div id="download_csv" align="right" class="mb-2">
+                <form method="POST">
+                    <button type="submit" class="btn btn-dark">Download</button>
+                </form>
+            </div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Transaction<br>ID</th>
+                        <th scope="col">Campaign<br>Name</th>
+                        <th scope="col">Influencer<br>Username</th>
+                        <th scope="col">Pay Amount</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Time</th>
+                        <th scope="col">Campaign<br>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if transactions %}
+                        {% for t in transactions[::-1] %}
+                            <tr>
+                                <td>{{ t.id }}</td>
+                                <td>{{ t.campaign.name }}</td>
+                                <td>{{ t.influencer.username }}</td>
+                                <td>INR {{ t.amount }}</td>
+                                <td>{{ t.date.strftime("%d %b, %Y") }}</td>
+                                <td>{{ t.date.strftime("%H:%M:%S") }}</td>
+                                <td><a href="{{ url_for('sponsor.campaign_view', id=t.campaign_id) }}" class="btn btn-outline-dark">View</a></td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td align="center" rowspan="2" colspan="7">No Transactions !</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock body %}

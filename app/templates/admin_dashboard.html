@@ -1,0 +1,261 @@
+{% extends 'admin_base.html' %}
+{% block title %}Dashboard{% endblock title %}
+{% block body %}
+    <div id="container">
+        <h1 align="center">Welcome {{ current_user.admin.name.split()[0] }}</h1>
+        <div id="stats" class="mt-5">
+            <div class="d-flex justify-content-center">
+                <canvas id="users" style="width:100%; max-width:950px"></canvas>
+            </div>
+            <br><br>
+            <div style="width: 47%; float: left;">
+                <canvas id="campaigns" style="width:100%; max-width:700px"></canvas>
+                <br>
+                <div align="center"><span>Total Campaigns<br>{{ campaign_values | sum }}</span></div>
+                <br><br>
+                <canvas id="flagged_campaigns" style="width:100%; max-width:700px"></canvas>
+                <br><br>
+                <canvas id="sponsor_industry" style="width:100%; max-width:700px"></canvas>
+            </div>
+            <div style="width: 47%; float: right;">
+                <canvas id="transactions" style="width:100%; max-width:700px"></canvas>
+                <br>
+                <div align="center">
+                    <span>
+                        Average Pay Amount
+                        <br>
+                        {% if transaction_values | length != 0 %}
+                            INR {{ ((transaction_values | sum) / (transaction_values | length)) | round(2) }}
+                        {% else %}
+                            INR 0
+                        {% endif %}
+                    </span>
+                </div>
+                <br><br>
+                <canvas id="campaign_status" style="width:100%; max-width:700px"></canvas>
+                <br><br>
+                <canvas id="influencer_niche" style="width:100%; max-width:700px"></canvas>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script>
+        var user_labels = {{ user_labels | tojson }};
+        var user_values = {{ user_values | tojson }};
+        new Chart("users", {
+            type: "bar",
+            data: {
+                labels: user_labels,
+                datasets: [{
+                    data: user_values,
+                    backgroundColor: user_values.map(() => randomizeColor())
+                }]
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: "Users Distribution"
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: "No. of Users"
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Role"
+                        }
+                    }]
+                }
+            }
+        });
+
+        var campaign_labels = {{ campaign_labels | tojson}};
+        var campaign_values = {{ campaign_values | tojson }};
+        new Chart("campaigns", {
+            type: "pie",
+            data: {
+                labels: campaign_labels,
+                datasets: [{
+                    data: campaign_values,
+                    backgroundColor: ["green", "orange", "blue", "red"]
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: "Campaigns"
+                }
+            }
+        });
+
+        var transaction_labels = {{ transaction_labels | tojson }};
+        var transaction_values = {{ transaction_values | tojson }};
+        new Chart("transactions", {
+            type: "bar",
+            data: {
+                labels: transaction_labels,
+                datasets: [{
+                    data: transaction_values,
+                    backgroundColor: transaction_values.map(() => randomizeColor())
+                }]
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: "Transactions"
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Budget"
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Completed Campaigns"
+                        }
+                    }]
+                }
+            }
+        });
+
+        var category_labels = {{ category_labels | tojson }};
+
+        var i_values = {{ i_values | tojson }};
+        new Chart("influencer_niche", {
+            type: "bar",
+            data: {
+                labels: category_labels,
+                datasets: [{
+                    data: i_values,
+                    backgroundColor: i_values.map(() => randomizeColor())
+                }]
+            },
+            options: {
+                legend: false,
+                title: {
+                    display: true,
+                    text: "Influencer based on Niche"
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: "No. of Influencer"
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Niche"
+                        }
+                    }]
+                }
+            }
+        });
+
+        var s_values = {{ s_values | tojson }};
+        new Chart("sponsor_industry", {
+            type: "bar",
+            data: {
+                labels: category_labels,
+                datasets: [{
+                    data: s_values,
+                    backgroundColor: s_values.map(() => randomizeColor())
+                }]
+            },
+            options: {
+                legend: false,
+                title: {
+                    display: true,
+                    text: "Sponsor based on Industry"
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: "No. of Sponsor"
+                        }
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Industry"
+                        }
+                    }]
+                }
+            }
+        });
+
+        var flagged_labels = {{ flagged_labels | tojson }}
+        var flagged_values = {{ flagged_values | tojson }}
+        new Chart("flagged_campaigns", {
+            type: "doughnut",
+            data: {
+                labels: flagged_labels,
+                datasets: [{
+                    data: flagged_values,
+                    backgroundColor: ["red", "green"]
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: "Flagged Campaigns"
+                }
+            }
+        });
+        
+        var status_labels = {{ status_labels | tojson }}
+        var status_values = {{ status_values | tojson }}
+        new Chart("campaign_status", {
+            type: "doughnut",
+            data: {
+                labels: status_labels,
+                datasets: [{
+                    data: status_values,
+                    backgroundColor: status_values.map(() => randomizeColor())
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: "Campaign Visibility"
+                }
+            }
+        });
+
+        function randomizeColor() {
+            const hex = "0123456789ABCDEF";
+            let color_code = "#";
+            for (i = 0; i < 6; i++) {
+                color_code += hex[parseInt(Math.random() * 16)]
+            }
+            return color_code
+        }
+    </script>
+{% endblock body %}

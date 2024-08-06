@@ -1,0 +1,76 @@
+{% extends 'admin_base.html' %}
+{% block title %}All Admins{% endblock title %}
+{% block body %}
+    <div id="container">
+        <h1 align="center" class="mb-5">All Admins</h1>
+        <div id="add_admin" class="panel ms-5" style="width: 40%; float: left;">
+            <h2 align="center">Add Admin</h2>
+            <br><br>
+            <form method="POST">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" id="name" name="name" value="{{ name }}" class="form-control" required>
+                <br>
+                <label for="username" class="form-label">Username</label>
+                <input type="text" id="username" name="username" value="{{ username }}" class="form-control" minlength="4" required>
+                <br>
+                <label for="email" class="form-label">Email ID</label>
+                <input type="email" id="email" name="email" value="{{ email }}" class="form-control" required>
+                <br>
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+                <br>
+                <label for="confirm_password" class="form-label">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                <br>
+                <button type="submit" class="btn btn-outline-dark" onclick="return validate()">Add Admin</button>
+            </form>
+        </div>
+        <div id="all_admins" style="width: 45%; float: right;">
+            <h2 align="center" class="me-5">Active Admins</h2>
+            <br><br>
+            {% if admins %}
+                <div class="row">
+                    {% for admin in admins %}
+                        <div class="col-md-6 mb-5">
+                            <div class="card" style="width: 15rem; align-items: center; text-align: center;">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ admin.name }}</h5>
+                                    <p class="card-text">@{{ admin.username }}</p>
+                                </div>
+                                <div class="card-body">
+                                    <form method="POST" action="{{ url_for('admin.flag_user', username=admin.username) }}">
+                                        <button type="submit" class="btn btn-outline-danger">Revoke Admin</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>  
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="d-flex justify-content-center" style="margin-top: 120px;">
+                    <span>No Admins !</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <script>
+        function validate() {
+            const messages = document.getElementById("js_messages");
+
+            const password = document.getElementById("password").value;
+            const confirm_password = document.getElementById("confirm_password").value;
+
+            if (password != confirm_password) {
+                messages.style.display = "block";
+                let message = "Passwords do not match !";
+                messages.innerHTML = `<div class="alert alert-danger alert-dismissible fade show sticky-top" role="alert">
+                                        ${message}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>`
+                return false;
+            }
+            
+            return true;
+        }
+    </script>
+{% endblock body %}

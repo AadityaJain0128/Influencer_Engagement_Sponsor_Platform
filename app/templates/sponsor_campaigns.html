@@ -1,0 +1,180 @@
+{% extends 'sponsor_base.html' %}
+{% block title %}Campaigns{% endblock title %}
+{% block body %}
+    <div id="container">
+        <h1 align="center">Add Campaign</h1>
+        <br>
+        <div id="add_campaign" class="d-flex justify-content-center">
+            <a type="button" data-bs-toggle="modal" data-bs-target="#add">
+                <img src="{{ url_for('static', filename='images/add.png') }}" height="60px" width="60px">
+            </a>
+            <div class="modal fade" id="add" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-fullscreen">
+                    <div class="modal-content">
+                        <form method="POST">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Add Campaign</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <table class="table table-striped mt-5" style="width: 60%; margin: auto;">
+                                    <tr>
+                                        <th>Name</th>
+                                        <td><input type="text" name="name" class="form-control" required></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Description</th>
+                                        <td><textarea name="description" class="form-control" rows="8"></textarea></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Start Date</th>
+                                        <td><input type="date" name="start_date" class="form-control" required></td>
+                                    </tr>
+                                    <tr>
+                                        <th>End Date</th>
+                                        <td><input type="date" name="end_date" class="form-control" required></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Budget</th>
+                                        <td><input type="number" step="0.01" name="budget" class="form-control" required></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Visibility</th>
+                                        <td>
+                                            <select name="visibility" class="form-control" required>
+                                                <option value="public">Public</option>
+                                                <option value="private">Private</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Discard</button>
+                                <button type="submit" class="btn btn-primary">Add Campaign</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div id="active_campaigns" class="m-4 mt-5">
+            <h4>Active Campaigns:</h4>
+            {% if active_campaigns %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Start Date</th>
+                            <th scope="col">End Date</th>
+                            <th scope="col">Budget</th>
+                            <th scope="col">Visibility</th>
+                            <th scope="col">Progress</th>
+                            <th scope="col">Influencer</th>
+                            <th scope="col">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        {% for campaign in active_campaigns[::-1] %}
+                            <tr>
+                                <td>{{ campaign.name }}</td>
+                                <td>{{ campaign.start_date.strftime("%d %b, %Y") }}</td>
+                                <td>{{ campaign.end_date.strftime("%d %b, %Y") }}</td>
+                                <td>INR {{ campaign.budget }}</td>
+                                <td>{{ campaign.visibility }}</td>
+                                <td>
+                                    {% if campaign.end_date == campaign.start_date %}
+                                        100%
+                                    {% else %}
+                                        {% if (datetime.now().date() - campaign.start_date) / (campaign.end_date - campaign.start_date) * 100 > 100 %}
+                                            100%
+                                        {% elif (datetime.now().date() - campaign.start_date) / (campaign.end_date - campaign.start_date) * 100 > 0 %}
+                                            {{ ((datetime.now().date() - campaign.start_date) / (campaign.end_date - campaign.start_date) * 100) | int }}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td>{{ Influencer.query.filter_by(id=campaign.influencer_id).first().name }}</td>
+                                <td>
+                                    <a href="{{ url_for('sponsor.campaign_view', id=campaign.id) }}" type="button" class="btn btn-outline-dark">View</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <span class="text-muted">Nothing Here !</span>
+            {% endif %}
+        </div>
+        <div id="pending_campaigns" class="m-4 mt-5">
+            <h4>Pending Campaigns:</h4>
+            {% if pending_campaigns[::-1] %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Start Date</th>
+                            <th scope="col">End Date</th>
+                            <th scope="col">Budget</th>
+                            <th scope="col">Visibility</th>
+                            <th scope="col">Details</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        {% for campaign in pending_campaigns[::-1] %}
+                            <tr>
+                                <td>{{ campaign.name }}</td>
+                                <td>{{ campaign.start_date.strftime("%d %b, %Y") }}</td>
+                                <td>{{ campaign.end_date.strftime("%d %b, %Y") }}</td>
+                                <td>INR {{ campaign.budget }}</td>
+                                <td>{{ campaign.visibility }}</td>
+                                <td><a href="{{ url_for('sponsor.campaign_view', id=campaign.id) }}" type="button" class="btn btn-outline-dark">View</a></td>
+                                <td><a href="{{ url_for('sponsor.campaign_delete', id=campaign.id) }}" class="btn btn-outline-danger">Delete</a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <span class="text-muted">Nothing Here !</span>
+            {% endif %}
+        </div>
+        <div id="completed_campaigns" class="m-4 mt-5">
+            <h4>Completed Campaigns:</h4>
+            {% if completed_campaigns %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Start Date</th>
+                        <th scope="col">End Date</th>
+                        <th scope="col">Budget</th>
+                        <th scope="col">Visibility</th>
+                        <th scope="col">Influencer</th>
+                        <th scope="col">Details</th>
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                    {% for campaign in completed_campaigns[::-1] %}
+                        <tr>
+                            <td>{{ campaign.name }}</td>
+                            <td>{{ campaign.start_date.strftime("%d %b, %Y") }}</td>
+                            <td>{{ campaign.end_date.strftime("%d %b, %Y") }}</td>
+                            <td>INR {{ campaign.budget }}</td>
+                            <td>{{ campaign.visibility }}</td>
+                            <td>{{ Influencer.query.filter_by(id=campaign.influencer_id).first().name }}</td>
+                            <td>
+                                <a href="{{ url_for('sponsor.campaign_view', id=campaign.id) }}" type="button" class="btn btn-outline-dark">View</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <span class="text-muted">Nothing Here !</span>
+            {% endif %}
+        </div>
+    </div>
+{% endblock body %}

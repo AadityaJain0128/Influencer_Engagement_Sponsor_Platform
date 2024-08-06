@@ -1,0 +1,55 @@
+{% extends 'admin_base.html' %}
+{% block title %}Flagged Users{% endblock title %}
+{% block body %}
+    <div id="container">
+        <h1 align="center">Flagged Users</h1>
+        <br><br>
+        <div style="width: 20%; float: left;" class="m-3">
+            <h3>Filters</h3>
+            <br>
+            <form method="GET">
+                <label for="name" class="form-label">Username</label>
+                <input type="text" id="username" name="username" placeholder="Search by UserName" value="{{ username }}" class="form-control">
+                <br>
+                <label for="role" class="form-label">Role</label>
+                <select id="role" name="role" class="form-control">
+                    <option value="">All</option>
+                    <option value="admin" {% if role == "admin" %} selected {% endif %}>Admin</option>
+                    <option value="influencer" {% if role == "influencer" %} selected {% endif %}>Influencer</option>
+                    <option value="sponsor" {% if role == "sponsor" %} selected {% endif %}>Sponsor</option>
+                </select>
+                <br>
+                <button type="submit" class="btn btn-outline-dark">Search</button>
+            </form>
+        </div>
+        <div style="width: 65%; float: right;" class="me-5">
+            {% if users %}
+                <div class="row">
+                    {% for user in users %}
+                        <div class="col-md-4 mb-5">
+                            <div class="card" style="width: 18rem; align-items: center; text-align: center;">
+                                <div class="card-body">
+                                    <h5 class="card-title">@{{ user.username }}</h5>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Role: {{ user.role | capitalize }}</li>
+                                </ul>
+                                <div class="card-body">
+                                    <form method="POST" action="{{ url_for('admin.unflag_user', username=user.username) }}">
+                                        <button type="submit" class="btn btn-outline-danger">UnFlag User</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="margin: 130px 0 0 220px;">
+                    <span>No Results found !</span>
+                    <br><br>
+                    <a href="{{ url_for('admin.flagged_users') }}" class="btn btn-outline-secondary">Clear all filters</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock body %}

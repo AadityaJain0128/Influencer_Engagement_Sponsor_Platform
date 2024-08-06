@@ -1,0 +1,75 @@
+{% extends 'admin_base.html' %}
+{% block title %}Find Influencer{% endblock title %}
+{% block body %}
+    <div id="container">
+        <h1 align="center">Find Influencers</h1>
+        <br><br>
+        <div style="width: 20%; float: left;" class="m-3">
+            <h3>Filters</h3>
+            <br>
+            <form method="GET">
+                <label for="name" class="form-label">Username / Name</label>
+                <input type="text" id="name" name="name" placeholder="Search by Name" value="{{ name }}" class="form-control">
+                <br>
+                <label for="niche" class="form-label">Niche</label>
+                <select id="niche" name="niche" class="form-control">
+                    <option value="">Select Niche</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.name }}" {% if cat.name == niche %} selected {% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+                <br>
+                <button type="submit" class="btn btn-outline-dark">Search</button>
+            </form>
+        </div>
+        <div style="width: 65%; float: right;" class="me-5">
+            {% if influencers %}
+                <div class="row">
+                    {% for i in influencers %}
+                        <div class="col-md-4 mb-5">
+                            <div class="card" style="width: 18rem; align-items: center; text-align: center;">
+                                <img src="{{ url_for('static', filename=i.profile_picture) }}" width="200px" height="200px" class="mt-2" style="border-radius: 50%; object-fit: cover;" class="card-title">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ i.name }}</h5>
+                                    <p class="card-text">@{{ i.username }}</p>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Niche: {{ i.niche }}</li>
+                                    {% if avg_ratings[i] %}
+                                        <li class="list-group-item">Rating: {{ avg_ratings[i][0] }} <span class="text-muted" style="font-size: smaller;">({{ avg_ratings[i][1] }})</span></li>
+                                    {% else %}
+                                        <li class="list-group-item">Rating: -- <span class="text-muted" style="font-size: smaller;">(0)</span></li>
+                                    {% endif %}
+                                    <li class="list-group-item">Reach: {{ i.reach }}</li>
+                                    <li class="list-group-item">
+                                        Active Socials<br>
+                                        {% if i.reach == 0 %}
+                                            <span class="text-muted">No Socials added !</span>
+                                        {% else %}
+                                            {% for social in i.socials %}
+                                                {% if i.socials[social] %}
+                                                    <img src="{{ url_for('static', filename='images/' + social + '.png') }}" width="30px" class="m-1 mt-2">
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </li>
+                                </ul>
+                                <div class="card-body">
+                                    <form method="POST" action="{{ url_for('admin.flag_user', username=i.username) }}">
+                                        <button type="submit" class="btn btn-outline-danger">Flag Influencer</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="margin: 130px 0 0 220px;">
+                    <span>No Results found !</span>
+                    <br><br>
+                    <a href="{{ url_for('admin.find_influencers') }}" class="btn btn-outline-secondary">Clear all filters</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

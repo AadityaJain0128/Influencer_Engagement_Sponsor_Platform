@@ -1,0 +1,63 @@
+{% extends 'admin_base.html' %}
+{% block title %}Flagged Campaigns{% endblock title %}
+{% block body %}
+    <div id="container">
+        <h1 align="center">Flagged Campaigns</h1>
+        <br><br>
+        <div style="width: 20%; float: left;" class="m-3">
+            <h3>Filters</h3>
+            <br>
+            <form method="GET">
+                <label for="cname" class="form-label">Campaign Name</label>
+                <input type="text" id="cname" name="cname" placeholder="Search by Campaign Name" value="{{ cname }}" class="form-control">
+                <br>
+                <label for="sname" class="form-label">Sponsor Name</label>
+                <input type="text" id="sname" name="sname" placeholder="Search by Sponsor Name" value="{{ sname }}" class="form-control">
+                <br>
+                <button type="submit" class="btn btn-outline-dark">Search</button>
+            </form>
+        </div>
+        <div style="width: 65%; float: right;" class="me-5">
+            {% if campaigns %}
+                <div class="row">
+                    {% for c in campaigns %}
+                        <div class="col-md-4 mb-5">
+                            <div class="card" style="width: 18rem; align-items: center; text-align: center;">
+                                <div class="card-body">
+                                    <h3 class="card-title">{{ c.name }}</h3>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Description: {{ c.description }}</li>
+                                    <li class="list-group-item">Sponsor: {{ c.sponsor.name }}</li>
+                                    <li class="list-group-item">Industry: {{ c.sponsor.industry }}</li>
+                                    <li class="list-group-item">Start Date: {{ c.start_date.strftime("%d %b, %Y") }}</li>
+                                    <li class="list-group-item">End date: {{ c.end_date.strftime("%d %b, %Y") }}</li>
+                                    <li class="list-group-item">Budget: INR {{ c.budget }}</li>
+                                    <li class="list-group-item">Visibility: {{ c.visibility }}</li>
+                                    {% if c.influencer_id %}
+                                        <li class="list-group-item">Status: Active</li>
+                                        <li class="list-group-item">Influencer: @{{ Influencer.query.filter_by(id=c.influencer_id).first().username }}</li>
+                                    {% else %}
+                                        <li class="list-group-item">Status: Pending</li>
+                                    {% endif %}
+                                </ul>
+                                <div class="card-body">
+                                    <form method="POST" action="{{ url_for('admin.unflag_campaign', id=c.id) }}">
+                                        <a href="{{ url_for('admin.campaign_view', id=c.id) }}" class="btn btn-outline-dark">View</a>
+                                        <button type="submit" class="btn btn-outline-danger">UnFlag Campaign</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="margin: 130px 0 0 220px;">
+                    <span>No Results found !</span>
+                    <br><br>
+                    <a href="{{ url_for('admin.flagged_campaigns') }}" class="btn btn-outline-secondary">Clear all filters</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

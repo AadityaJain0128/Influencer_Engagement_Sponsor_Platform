@@ -1,0 +1,47 @@
+{% extends 'sponsor_base.html' %}
+{% block title %}Profile{% endblock title %}
+{% block body %}
+    <div class="container">
+        <div class="m-5">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th colspan="2" class="text-center"><h1>Profile Page</h1></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <form method="POST">
+                        <tr>
+                            <th scope="row">User Name</th>
+                            <td>{{ current_user.username }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="email">E-Mail ID</label></th>
+                            <td>{{ current_user.email }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="nname">Name</label></th>
+                            <td><input type="text" id="name" name="name" value="{{ current_user.sponsor.name }}" class="form-control" required></td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><label for="industry">Industry</label></th>
+                            <td>
+                                <select id="industry" name="industry" class="form-control" required>
+                                    {% for category in categories %}
+                                        <option value="{{ category.name }}" {% if category.name == current_user.sponsor.industry %} selected {% endif %}>{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <td colspan="2">
+                                <button type="submit" class="btn btn-outline-dark">Save Changes</button>
+                            </td>
+                        </tr>
+                    </form>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock body %}

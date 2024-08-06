@@ -1,0 +1,94 @@
+{% extends 'influencer_base.html' %}
+{% block title %}Find Campaign{% endblock title %}
+{% block body %}
+    <div id="container">
+        <h1 align="center">Find Campaigns</h1>
+        <br><br>
+        <div style="width: 20%; float: left;" class="m-3">
+            <h3>Filters</h3>
+            <br>
+            <form method="GET">
+                <label for="cname" class="form-label">Campaign Name</label>
+                <input type="text" id="cname" name="cname" placeholder="Search by Campaign Name" value="{{ cname }}" class="form-control">
+                <br>
+                <label for="sname" class="form-label">Sponsor Name</label>
+                <input type="text" id="sname" name="sname" placeholder="Search by Sponsor Name" value="{{ sname }}" class="form-control">
+                <br>
+                <button type="submit" class="btn btn-outline-dark">Search</button>
+            </form>
+        </div>
+        <div style="width: 65%; float: right;" class="me-5">
+            {% if campaigns %}
+                <div class="row">
+                    {% for c in campaigns %}
+                        <div class="col-md-4 mb-5">
+                            <div class="card" style="width: 18rem; align-items: center; text-align: center;">
+                                <div class="card-body">
+                                    <h3 class="card-title">{{ c.name }}</h3>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Description: {{ c.description }}</li>
+                                    <li class="list-group-item">Sponsor: {{ c.sponsor.name }}</li>
+                                    <li class="list-group-item">Industry: {{ c.sponsor.industry }}</li>
+                                    <li class="list-group-item">Start Date: {{ c.start_date.strftime("%d %b, %Y") }}</li>
+                                    <li class="list-group-item">End date: {{ c.end_date.strftime("%d %b, %Y") }}</li>
+                                    <li class="list-group-item">Budget: INR {{ c.budget }}</li>
+                                </ul>
+                                <div class="card-body">
+                                    <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#{{ c.id }}">Send Request</button>
+                                    <div class="modal fade" id="{{ c.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <form method="POST">
+                                                    <div class="modal-header">
+                                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Request Campaign</h1>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <table class="table table-striped mt-5">
+                                                            <thead><h4>{{ c.name }}</h4></thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <th>Messages</th>
+                                                                    <td><input type="text" name="messages" class="form-control" required></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Requirements</th>
+                                                                    <td><input type="text" name="requirements" class="form-control" required></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Budget</th>
+                                                                    <td><input type="text" name="budget" class="form-control" value="{{ c.budget }}" readonly></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Negotiation Amount</th>
+                                                                    <td><input type="number" step=".01" name="req_budget" value="{{ c.budget }}" class="form-control" required></td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <input type="number" name="campaign_id" value="{{ c.id }}" hidden>
+                                                        <input type="number" name="influencer_id" value="{{ current_user.influencer.id }}" hidden>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        <button type="submit" class="btn btn-primary">Send Request</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="margin: 130px 0 0 220px;">
+                    <span>No Results found !</span>
+                    <br><br>
+                    <a href="{{ url_for('influencer.find') }}" class="btn btn-outline-secondary">Clear all filters</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
