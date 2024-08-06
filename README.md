@@ -1,6 +1,8 @@
 ### The objective of the Project was to build a platform to connect sponsors and influencers so that sponsors can get their product / service advertised and Influencer can get Monetary Benefit.
 
 
+
+
 ### Technologies Used
   1.  Flask: Python Framework for running server, requests handling and defining routes of Web App.    
   2.  Flask Sqlalchemy: Used for defining Database Models, executing queries and saving changes permanently.    
@@ -8,6 +10,8 @@
   4.  Werkzeug Security: Used for generating hash for the passwords to store it in the Database.    
   5.  Jinja: Used for render HTML templates dynamically.    
   6.  OS: Used for storing dynamically generated csv files, etc.
+
+
 
 
 ### Features
@@ -34,6 +38,8 @@
     3.  Can Unflag the User and Campaigns.   
     4.  Can delete the Campaigns.   
     5.  Main/Master Admin can add or flag/unflag other Admins also.
+
+
 
 
 ### Project Directory 
