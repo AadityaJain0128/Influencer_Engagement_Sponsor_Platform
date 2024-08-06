@@ -1,4 +1,4 @@
-The objective of the Project was to build a platform to connect sponsors and influencers so that sponsors can get their product / service advertised and Influencer can get Monetary Benefit.
+# The objective of the Project was to build a platform to connect sponsors and influencers so that sponsors can get their product / service advertised and Influencer can get Monetary Benefit.
 
 
 ## Technologies Used
